@@ -19,49 +19,50 @@ skill_to_category = {
     # Add more skill-category mappings here...
 }
 
-# Streamlit setup
-st.set_page_config(page_title="Trainer & Trending Skills", layout="wide")
-st.title("🔍 Trainer & Trending Skills Recommender")
+st.set_page_config(page_title="Trending Skills & Trainer Recommender", layout="wide")
+st.title("🔍 Trending Skills & Trainer Recommender")
 
 # Load data from Google Sheet (public CSV URLs)
 CSV_URL_TRENDING = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSciotZEMPUqnyLbEwFRZSOy4r6-2L7eKjkm4IvBW8pC6tVhzmBFM08jTIqVzVfn7klNfJEFpYV5oxz/pub?gid=2086370624&single=true&output=csv"
 CSV_URL_TRAINERS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?gid=0&single=true&output=csv"
 
+# Load the trending skills and trainer data
 try:
-    df_trending_skills = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSciotZEMPUqnyLbEwFRZSOy4r6-2L7eKjkm4IvBW8pC6tVhzmBFM08jTIqVzVfn7klNfJEFpYV5oxz/pub?gid=2086370624&single=true&output=csv")
-    df_trainers = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?gid=0&single=true&output=csv")
-except Exception as e:
+df_trending_skills = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSciotZEMPUqnyLbEwFRZSOy4r6-2L7eKjkm4IvBW8pC6tVhzmBFM08jTIqVzVfn7klNfJEFpYV5oxz/pub?gid=2086370624&single=true&output=csv")
+    df_trainers = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?gid=0&single=true&output=csv")except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
 
-# Process trending skills data
-df_trending_skills = df_trending_skills[['Skill', 'Occurrences']]  # Only keep relevant columns
-top_skills = df_trending_skills.sort_values(by="Occurrences", ascending=False).head(10)
-
-# Preprocess the trainer data (Skills taught)
+# Preprocess the data (Skills taught by trainers)
 df_trainers["Skills Taught"] = df_trainers["Skills Taught"].fillna("").apply(lambda x: [s.strip().lower() for s in x.split(",")])
 
-# Display trending skills
-st.subheader("🔥 Top 10 Trending Skills")
-for index, row in top_skills.iterrows():
-    st.write(f"**{row['Skill']}** - {row['Occurrences']} Occurrences")
-
-# User input for trainer recommendation
+# User input for skills
 skills_input = st.text_input("🧠 Enter skills you're looking for (comma-separated):")
 location_input = st.text_input("📍 Enter your location:")
 
 if st.button("Find Trainers"):
-    user_skills = [skill.strip().lower() for skill in skills_input.split(",") if skill.strip()]
-    user_location = location_input.strip().lower()
-
-    if not user_skills:
+    if not skills_input:
         st.warning("Please enter at least one skill.")
     else:
-        # Match logic for trainers
+        # User skills input processing
+        user_skills = [skill.strip().lower() for skill in skills_input.split(",") if skill.strip()]
+        
+        # 1. Display the trending skills for the entered skills
+        trending_matches = df_trending_skills[df_trending_skills['Skill'].str.lower().isin(user_skills)]
+
+        if not trending_matches.empty:
+            st.markdown("🔥 **Top Trending Skills**")
+            for _, row in trending_matches.iterrows():
+                st.markdown(f"{row['Skill']} - {row['Occurrences']} Occurrences")
+        else:
+            st.warning("⚠️ No trending skills found for the entered skills.")
+
+        # 2. Display matching trainers
         matches = df_trainers[df_trainers["Skills Taught"].apply(lambda skills: any(skill in skills for skill in user_skills))]
 
-        if user_location:
-            matches = matches[matches["City"].str.contains(user_location)]
+        # If a location is provided, filter trainers by city
+        if location_input:
+            matches = matches[matches["City"].str.contains(location_input.strip(), case=False)]
 
         if not matches.empty:
             st.success(f"✅ Found {len(matches)} matching trainer(s):")
