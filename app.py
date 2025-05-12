@@ -14,13 +14,18 @@ except Exception as e:
     st.error(f"Error loading Trending Skills data: {e}")
     st.stop()
 
-# Sort the skills by Occurrences in descending order and get the top 10
-top_skills = df_trending_skills.sort_values(by="Occurrences", ascending=False).head(10)
+# Show column names to check if 'Occurrences' exists and is correctly named
+st.write("### Columns in the data:")
+st.write(df_trending_skills.columns)
 
-# Display the top 10 trending skills
-st.write("### Top 10 Trending Skills (based on learner submissions):")
-st.dataframe(top_skills)
+# If "Occurrences" column exists, continue with the sorting logic
+if "Occurrences" in df_trending_skills.columns:
+    top_skills = df_trending_skills.sort_values(by="Occurrences", ascending=False).head(10)
+    st.write("### Top 10 Trending Skills (based on learner submissions):")
+    st.dataframe(top_skills)
 
-# Visualization: Trending skills in a bar chart
-st.write("### Visualization of Trending Skills:")
-st.bar_chart(top_skills.set_index("Skill")["Occurrences"])
+    # Visualization: Trending skills in a bar chart
+    st.write("### Visualization of Trending Skills:")
+    st.bar_chart(top_skills.set_index("Skill")["Occurrences"])
+else:
+    st.error("The 'Occurrences' column is missing or incorrectly named.")
