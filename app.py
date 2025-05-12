@@ -24,12 +24,12 @@ st.set_page_config(page_title="Trainer & Trending Skills", layout="wide")
 st.title("🔍 Trainer & Trending Skills Recommender")
 
 # Load data from Google Sheet (public CSV URLs)
-CSV_URL_TRENDING = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?gid=2086370624&single=true&output=csv"
-CSV_URL_TRAINERS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?output=csv"
+CSV_URL_TRENDING = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSciotZEMPUqnyLbEwFRZSOy4r6-2L7eKjkm4IvBW8pC6tVhzmBFM08jTIqVzVfn7klNfJEFpYV5oxz/pub?gid=2086370624&single=true&output=csv"
+CSV_URL_TRAINERS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?gid=0&single=true&output=csv"
 
 try:
-    df_trending_skills = pd.read_csv(CSV_URL_TRENDING)
-    df_trainers = pd.read_csv(CSV_URL_TRAINERS)
+    df_trending_skills = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSciotZEMPUqnyLbEwFRZSOy4r6-2L7eKjkm4IvBW8pC6tVhzmBFM08jTIqVzVfn7klNfJEFpYV5oxz/pub?gid=2086370624&single=true&output=csv")
+    df_trainers = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Ar35mOmUWVi7sxlukLJLKtJ3WhtSx_dgEeB4GbNbOUAeTNKO0roiwUreM3sXFTnhlbRGM14yMqEP/pub?gid=0&single=true&output=csv")
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
